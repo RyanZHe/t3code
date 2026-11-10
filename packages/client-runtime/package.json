@@ -3,6 +3,10 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./model-tradeoff": {
+      "types": "./src/modelTradeoff.ts",
+      "default": "./src/modelTradeoff.ts"
+    },
     "./assembly-highlighting": {
       "types": "./src/assemblyHighlighting.ts",
       "default": "./src/assemblyHighlighting.ts"

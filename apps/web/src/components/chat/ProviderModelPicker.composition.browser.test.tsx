@@ -14,7 +14,16 @@ import { ProviderModelPicker } from "./ProviderModelPicker";
 
 const instanceId = ProviderInstanceId.make("codex");
 
-function Picker({ keybindings = [] }: { keybindings?: ResolvedKeybindingsConfig }) {
+function Picker({
+  keybindings = [],
+  models = [
+    { slug: "original", name: "Original model" },
+    { slug: "target", name: "Target model" },
+  ],
+}: {
+  keybindings?: ResolvedKeybindingsConfig;
+  models?: ReadonlyArray<{ slug: string; name: string }>;
+}) {
   const [model, setModel] = useState("original");
   return (
     <>
@@ -40,17 +49,7 @@ function Picker({ keybindings = [] }: { keybindings?: ResolvedKeybindingsConfig 
           },
         ])}
         keybindings={keybindings}
-        modelOptionsByInstance={
-          new Map([
-            [
-              instanceId,
-              [
-                { slug: "original", name: "Original model" },
-                { slug: "target", name: "Target model" },
-              ],
-            ],
-          ])
-        }
+        modelOptionsByInstance={new Map([[instanceId, models]])}
         triggerAriaLabel="Choose model"
         onInstanceModelChange={(_, selected) => setModel(selected)}
       />
@@ -117,4 +116,32 @@ it("keeps composing keys from triggering model jump shortcuts", async () => {
       .element(screen.getByRole("status", { name: "Selected model" }))
       .toHaveTextContent("original");
   }
+});
+
+it("previews a speed-quality suggestion before applying it and retains manual selection", async () => {
+  await using screen = await render(
+    <Picker
+      models={[
+        { slug: "gpt-6-luna", name: "Luna" },
+        { slug: "gpt-6-sol", name: "Sol" },
+        { slug: "gpt-6-astra", name: "Astra" },
+      ]}
+    />,
+  );
+  await screen.getByRole("button", { name: "Choose model" }).click();
+  const slider = page.getByRole("slider", { name: "Model speed and quality" });
+  await expect.element(slider).toHaveAttribute("aria-valuetext", "Balanced: Sol");
+  await act(() => slider.element().focus());
+  await userEvent.keyboard("{End}");
+  await expect.element(slider).toHaveAttribute("aria-valuetext", "Higher quality: Astra");
+  await expect
+    .element(screen.getByRole("status", { name: "Selected model" }))
+    .toHaveTextContent("original");
+  await page.getByRole("button", { name: "Use model", exact: true }).click();
+  await expect
+    .element(screen.getByRole("status", { name: "Selected model" }))
+    .toHaveTextContent("gpt-6-astra");
+  await screen.getByRole("button", { name: "Choose model" }).click();
+  await page.getByRole("button", { name: "Choose manually" }).click();
+  await expect.element(page.getByRole("option", { name: /Luna/ })).toBeVisible();
 });

@@ -12,6 +12,14 @@ becomes an attachment when inserting it would exceed the message limit. On a
 hardware keyboard, use `Cmd+Shift+V` on Apple devices or `Ctrl+Shift+V` elsewhere
 to keep a large paste editable in the composer instead.
 
+## Choose a model
+
+On web and desktop, open the model control and move the speed-to-quality slider
+for a suggested model, then choose **Use model** to apply it. Suggestions use
+recognized model families from the available catalog; actual performance varies.
+Use **Choose manually** or search to select a specific model, including custom
+models. Providers without recognized families use the manual picker.
+
 ## Formatting
 
 The composer writes Markdown and shows it styled as you type. When your cursor
